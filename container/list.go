@@ -13,20 +13,17 @@ type ListNode struct {
 }
 
 func NewList() (list *List) {
-	h := new(ListNode)
-	t := new(ListNode)
-	h.next = t
-	t.pre = h
-	return &List{head: h, tail: t}
+	head := new(ListNode)
+	tail := new(ListNode)
+	head.next = tail
+	tail.pre = head
+	return &List{head: head, tail: tail}
 }
 
 func (l *List) AddHead(val int) {
 	node := new(ListNode)
 	node.val = val
-	node.next = l.head
-	l.head.pre = node
-	l.head = node
-	l.size++
+	l.addNewNode(l.head, node, l.head.next)
 }
 
 func (l *List) GetHead() (val int) {
@@ -36,30 +33,38 @@ func (l *List) GetHead() (val int) {
 func (l *List) AddTail(val int) {
 	node := new(ListNode)
 	node.val = val
-	node.pre = l.tail
-	l.tail.next = node
-	l.head = node
-	l.size++
+	l.addNewNode(l.tail.pre, node, l.tail)
 }
 
 func (l *List) GetTail() (val int) {
 	return l.tail.pre.val
 }
 
-func (l *List) AddNodeByNo(index, val int) {
-	temp := l.head.next
-	pos := 1
-	for temp != l.tail {
+func (l *List) GetNodeByNo(index int) (val int) {
+	for temp, pos := l.head.next, 1; temp != l.tail; temp, pos = temp.next, pos+1 {
 		if pos == index {
-			node := &ListNode{val: val}
-			l.addNewNode(temp.pre, node, temp)
+			val = temp.val
+			break
 		}
 	}
+	return val
+}
+
+func (l *List) AddNodeByNo(index, val int) {
+	pos := 1
+	node := &ListNode{val: val}
+	for temp := l.head.next; temp != l.tail; temp = temp.next {
+		if pos == index {
+			l.addNewNode(temp.pre, node, temp)
+			return
+		}
+		pos++
+	}
+	l.addNewNode(l.tail.pre, node, l.tail)
 }
 
 func (l *List) DeleteFirstByVal(val int) {
-	temp := l.head.next
-	for temp != l.tail {
+	for temp := l.head.next; temp != l.tail; temp = temp.next {
 		if temp.val == val {
 			l.deleteNode(temp)
 			break
@@ -68,8 +73,7 @@ func (l *List) DeleteFirstByVal(val int) {
 }
 
 func (l *List) DeleteAllByVal(val int) {
-	temp := l.head.next
-	for temp != l.tail {
+	for temp := l.head.next; temp != l.tail; temp = temp.next {
 		if temp.val == val {
 			l.deleteNode(temp)
 		}
@@ -78,14 +82,11 @@ func (l *List) DeleteAllByVal(val int) {
 
 // DeleteByNo 删除指定位置节点
 func (l *List) DeleteByNo(index int) {
-	temp := l.head.next
-	pos := 1
-	for temp != l.tail {
+	for temp, pos := l.head.next, 1; temp != l.tail; temp, pos = temp.next, pos+1 {
 		if pos == index {
 			l.deleteNode(temp)
 			break
 		}
-		pos++
 	}
 }
 
